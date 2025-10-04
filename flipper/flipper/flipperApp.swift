@@ -27,11 +27,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func configureTransparentWindow(_ window: NSWindow) {
+        window.title = "Flipper"
         window.isOpaque = false
         window.backgroundColor = .clear
         window.hasShadow = false
         window.titlebarAppearsTransparent = true
-        window.titleVisibility = .hidden
+        window.titleVisibility = .visible
         window.styleMask.insert(.fullSizeContentView)
         window.isMovableByWindowBackground = false  // Changed to false to allow toolbar interaction
         window.level = .floating
