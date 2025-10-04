@@ -7,8 +7,10 @@ class ScreenCaptureManager: ObservableObject {
     private var stream: SCStream?
     private var streamOutput: StreamOutput?
     private var ourWindow: NSWindow?
+    var toolbarHeight: CGFloat = 0
 
-    func startCapture(windowFrame: CGRect, window: NSWindow) async {
+    func startCapture(windowFrame: CGRect, window: NSWindow, toolbarHeight: CGFloat = 0) async {
+        self.toolbarHeight = toolbarHeight
         self.ourWindow = window
 
         do {
@@ -72,10 +74,18 @@ class ScreenCaptureManager: ObservableObject {
     }
 
     private func convertToScreenCaptureCoordinates(windowFrame: CGRect, displayHeight: CGFloat) -> CGRect {
-        // NSWindow.frame has origin at bottom-left, but ScreenCaptureKit expects top-left
-        // Convert by flipping the Y coordinate
+        // windowFrame comes from convertToScreen which uses Cocoa coordinates (origin bottom-left)
+        // ScreenCaptureKit expects coordinates with origin at top-left
+        // So we need to flip: top-left Y = displayHeight - bottom-left Y - height
         let flippedY = displayHeight - windowFrame.origin.y - windowFrame.height
-        return CGRect(x: windowFrame.origin.x, y: flippedY, width: windowFrame.width, height: windowFrame.height)
+        let result = CGRect(
+            x: windowFrame.origin.x,
+            y: flippedY,
+            width: windowFrame.width,
+            height: windowFrame.height
+        )
+        print("DEBUG: displayHeight=\(displayHeight), windowFrame=\(windowFrame), flippedY=\(flippedY), captureRect=\(result)")
+        return result
     }
 
     func stopCapture() async {
