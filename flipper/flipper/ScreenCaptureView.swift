@@ -78,14 +78,12 @@ class ScreenCaptureManager: ObservableObject {
         // ScreenCaptureKit expects coordinates with origin at top-left
         // So we need to flip: top-left Y = displayHeight - bottom-left Y - height
         let flippedY = displayHeight - windowFrame.origin.y - windowFrame.height
-        let result = CGRect(
+        return CGRect(
             x: windowFrame.origin.x,
             y: flippedY,
             width: windowFrame.width,
             height: windowFrame.height
         )
-        print("DEBUG: displayHeight=\(displayHeight), windowFrame=\(windowFrame), flippedY=\(flippedY), captureRect=\(result)")
-        return result
     }
 
     func stopCapture() async {

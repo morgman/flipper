@@ -5,7 +5,7 @@ struct ContentView: View {
     @StateObject private var captureManager = ScreenCaptureManager()
     @StateObject private var windowObserver = WindowObserver()
     @State private var magnification: Double = 1.0
-    @State private var flipHorizontal: Bool = true
+    @State private var flipHorizontal: Bool = false
     @State private var flipVertical: Bool = false
     @State private var toolbarHeight: CGFloat = 0
 
@@ -61,7 +61,6 @@ struct ContentView: View {
                             adjustedFrame.origin.y += titleBarHeight + 8  // Fine-tune adjustment
                             adjustedFrame.size.height = contentHeight - toolbarHeight
 
-                            print("DEBUG: windowFrame=\(windowFrame), contentHeight=\(contentHeight), titleBarHeight=\(titleBarHeight), toolbarHeight=\(toolbarHeight), adjustedFrame=\(adjustedFrame)")
                             await captureManager.startCapture(windowFrame: adjustedFrame, window: window, toolbarHeight: 0)
                         }
                     }
@@ -103,7 +102,7 @@ struct ContentView: View {
             HStack {
                 Text("Magnification:")
                     .font(.caption)
-                Slider(value: $magnification, in: 0.0...3.0, step: 0.1)
+                Slider(value: $magnification, in: 1.0...3.0, step: 0.1)
                     .frame(width: 150)
                 Text(String(format: "%.1fx", magnification))
                     .font(.caption)
@@ -143,7 +142,6 @@ struct ContentView: View {
             .background(GeometryReader { geometry in
                 Color.clear.onAppear {
                     toolbarHeight = geometry.size.height
-                    print("DEBUG: Toolbar height = \(toolbarHeight)")
                 }
             })
         }
