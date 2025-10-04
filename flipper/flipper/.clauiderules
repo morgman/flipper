@@ -1,0 +1,72 @@
+# Flipper macOS App Development Rules
+
+## SwiftUI Window Coordinate Systems
+
+### Critical Coordinate System Facts
+1. **NSWindow.frame**: Uses Cocoa coordinates with origin at **bottom-left** of screen
+2. **NSWindow.convertToScreen()**: Returns Cocoa coordinates (bottom-left origin)
+3. **ScreenCaptureKit**: Expects coordinates with origin at **top-left** of screen
+4. **Conversion formula**: `topLeftY = displayHeight - bottomLeftY - height`
+
+### Window Content Area Calculation
+When capturing screen content that needs pixel-perfect alignment:
+
+1. **Use window.frame** as the base, not contentLayoutRect alone
+2. **Calculate title bar height**: `titleBarHeight = window.frame.height - window.contentLayoutRect.height`
+3. **Adjust Y origin**: Add title bar height to move from window origin to content area
+4. **Fine-tune offset**: May need additional +/- pixels for borders/spacing (discovered +8 works for this app)
+5. **Reduce height**: Subtract any toolbar/chrome heights from content height
+
+```swift
+let windowFrame = window.frame
+let contentHeight = window.contentLayoutRect.height
+let titleBarHeight = windowFrame.height - contentHeight
+
+var adjustedFrame = windowFrame
+adjustedFrame.origin.y += titleBarHeight + 8  // +8 fine-tune for perfect alignment
+adjustedFrame.size.height = contentHeight - toolbarHeight
+```
+
+## ScreenCaptureKit Best Practices
+
+### Window Exclusion
+Always exclude your own window from capture to prevent recursive imaging:
+```swift
+let ourWindowID = window.windowNumber
+let windowsToExclude = content.windows.filter { $0.windowID == CGWindowID(ourWindowID) }
+let filter = SCContentFilter(display: display, excludingWindows: windowsToExclude)
+```
+
+### Configuration
+- Set `config.width` and `config.height` to match the actual capture region dimensions
+- Use `config.sourceRect` for the screen region to capture
+- The sourceRect uses top-left origin coordinates
+
+## SwiftUI Window Interactivity
+
+### Making Toolbar Controls Interactive
+When window has transparent background:
+1. Set `isMovableByWindowBackground = false` (not true!)
+2. Add drag gesture to content area only for window movement
+3. Leave toolbar without drag gesture so controls receive clicks
+
+### Toolbar Placement
+Bottom toolbar is better than top toolbar because:
+- No offset issues with content area alignment
+- Title bar already at top, toolbar at bottom balances the UI
+- Content area starts at consistent Y position
+
+## Debugging Coordinate Issues
+
+When alignment is off:
+1. Print actual coordinates at each step: `windowFrame`, `contentRect`, `adjustedFrame`
+2. Print display height and calculated Y positions
+3. Check if offset direction matches expectations (up vs down on screen)
+4. Remember: Adding to Y in Cocoa coords moves UP (away from bottom)
+5. Fine-tune with small increments (+/- 2, 4, 8 pixels) until perfect
+
+## Common Pitfalls
+- Don't double-convert coordinates (convertToScreen already gives screen coords)
+- Don't use contentLayoutRect origin directly - it's relative to window, not screen
+- Remember toolbar at bottom reduces content height but doesn't change Y origin
+- Transparent windows need special handling for click-through vs interactivity
