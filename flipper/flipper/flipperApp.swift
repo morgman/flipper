@@ -15,7 +15,6 @@ struct flipperApp: App {
         WindowGroup {
             ContentView()
         }
-        .windowStyle(.hiddenTitleBar)
     }
 }
 
@@ -31,9 +30,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.isOpaque = false
         window.backgroundColor = .clear
         window.hasShadow = false
-        window.titlebarAppearsTransparent = true
+        window.titlebarAppearsTransparent = false  // Make title bar opaque so title is visible
         window.titleVisibility = .visible
-        window.styleMask.insert(.fullSizeContentView)
         window.isMovableByWindowBackground = false  // Changed to false to allow toolbar interaction
         window.level = .floating
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
