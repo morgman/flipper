@@ -15,7 +15,6 @@ struct flipperApp: App {
         WindowGroup {
             ContentView()
         }
-        .windowStyle(.hiddenTitleBar)
     }
 }
 
@@ -27,13 +26,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func configureTransparentWindow(_ window: NSWindow) {
+        window.title = "Flipper"
         window.isOpaque = false
         window.backgroundColor = .clear
         window.hasShadow = false
-        window.titlebarAppearsTransparent = true
-        window.titleVisibility = .hidden
-        window.styleMask.insert(.fullSizeContentView)
-        window.isMovableByWindowBackground = true
+        window.titlebarAppearsTransparent = false  // Make title bar opaque so title is visible
+        window.titleVisibility = .visible
+        window.isMovableByWindowBackground = false  // Changed to false to allow toolbar interaction
         window.level = .floating
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
     }
